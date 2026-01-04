@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eagle SYSTEM "eagle.dtd">
+<eagle version="9.7.0">
+<layerstackup name="Default Layer Stack" type="Standard Stackup" version="V2" symetrical="yes" display_unit="mic" roughness_model="0" surface_roughness="0.001mm" surface_huray_noduleradius="0.0005mm" surface_huray_surfaceratio="1" allow_instack_material_edit="no" core_color="#FF626262" prepreg_color="#FFB1B1B1" dielectric_color="#FF9E9E9E">
+ <layerdef type="Signal" id="{0a535f51-9cf1-4be8-a79d-ba75693cd13a}" layer="1" name="Top" locally_modified_material="yes">
+ <material name="User Defined" thickness="0.035mm" weight="1oz" process="Electro Deposited" source="User"/>
+</layerdef>
+ <layerdef type="Prepreg" id="{0f7824e0-954c-4a14-b5d6-dd4a3f281b62}" layer="2" name="Dielectric-2" locally_modified_material="yes">
+ <material name="User Defined" glass_style="" thickness="0.2mm" resin="50%" dielectric_constant_1g="4.5" dissipation_factor_1g="0.02" glass_transition_temperature="125degC" source="User"/>
+</layerdef>
+ <layerdef type="Signal" id="{2e2ba2d4-12d1-4919-9b91-5ff4ada93a53}" layer="2" name="Route2" locally_modified_material="yes">
+ <material name="User Defined" thickness="0.0175mm" weight="1oz" process="Electro Deposited" source="User"/>
+</layerdef>
+ <layerdef type="Core" id="{d0ce6b3b-862c-4f03-aab7-62766bf263d3}" layer="1" name="Dielectric-1" locally_modified_material="yes">
+ <material name="User Defined" construction="" thickness="1.065mm" resin="50%" dielectric_constant_1g="4.5" dissipation_factor_1g="0.02" glass_transition_temperature="125degC" source="User"/>
+</layerdef>
+ <layerdef type="Signal" id="{239a3b28-5f42-466f-b3d8-905c161bddbc}" layer="303" name="Route63" locally_modified_material="yes">
+ <material name="User Defined" thickness="0.0175mm" weight="1oz" process="Electro Deposited" source="User"/>
+</layerdef>
+ <layerdef type="Prepreg" id="{e874f5fc-6c15-48b0-b45d-a79ab74355b7}" layer="3" name="Dielectric-3" locally_modified_material="yes">
+ <material name="User Defined" glass_style="" thickness="0.2mm" resin="50%" dielectric_constant_1g="4.5" dissipation_factor_1g="0.02" glass_transition_temperature="125degC" source="User"/>
+</layerdef>
+ <layerdef type="Signal" id="{3b53cbc9-9634-4f71-9b3b-25d0e718e9e8}" layer="304" name="Bottom" locally_modified_material="yes">
+ <material name="User Defined" thickness="0.035mm" weight="1oz" process="Electro Deposited" source="User"/>
+</layerdef>
+ <viadef name="Thru 1:64" startlayer="1" stoplayer="304" complement="no"/>
+ <viadef name="MicroVia 64:63|2:1" startlayer="304" stoplayer="303" complement="yes" microvia="yes"/>
+ <viadef name="MicroVia 63:2" startlayer="303" stoplayer="2" complement="no" microvia="yes"/>
+ <viadef name="Blind 2:64" startlayer="2" stoplayer="304" complement="no"/>
+ <viadef name="Blind 1:63" startlayer="1" stoplayer="303" complement="no"/>
+ </layerstackup>
+ </eagle>
