@@ -23,11 +23,11 @@
  <rulecategory type="Via Restrict Clearance" manualdrc="yes" livedrc="yes"/>
  <rulecategory type="Teardrop" manualdrc="no" livedrc="no"/>
  <rule type="Minimum Copper Width" builtin_ruleid="14" enabled="yes" priority="0" value="3mil" preferredvalue="0.09mm" check_polywidth="no" name="minimum-copper-width-1"/>
- <rule type="Minimum Drill Size" builtin_ruleid="15" enabled="yes" priority="0" value="0.15mm" preferredvalue="0.15mm" name="minimum-drill-size-1"/>
  <rule type="Teardrop" builtin_ruleid="22" enabled="yes" priority="0" onescope="is_via" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-1"/>
  <rule type="Teardrop" builtin_ruleid="23" enabled="yes" priority="1" onescope="is_pad" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-2"/>
  <rule type="Teardrop" builtin_ruleid="24" enabled="yes" priority="2" onescope="is_smd" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-3"/>
  <rule type="Teardrop" builtin_ruleid="25" enabled="yes" priority="3" onescope="is_wire_polygon" lengthratio="0.5" widthratio="0.9" curved_sides="no" auto_generate="no" name="teardrop-4"/>
+ <rule type="Minimum Drill Size" builtin_ruleid="15" enabled="yes" priority="0" value="0.15mm" preferredvalue="0.15mm" name="minimum-drill-size-1"/>
  <rule type="Acute Angle" builtin_ruleid="16" enabled="yes" priority="0" name="acute-angle-1"/>
  <rule type="Wire Stub" builtin_ruleid="17" enabled="yes" priority="0" name="wire-stub-1"/>
  <rule type="Air-Wire" builtin_ruleid="19" enabled="yes" priority="0" name="air-wire-1"/>
@@ -42,10 +42,10 @@
  <rule type="Copper Clearance" builtin_ruleid="7" enabled="yes" priority="7" onescope="is_smd" otherscope="is_via" value="0mil" preferredvalue="5mil" samesignal="yes" name="copper-clearance-8"/>
  <rule type="Copper Clearance" builtin_ruleid="8" enabled="yes" priority="8" onescope="is_smd" otherscope="is_smd" value="0mil" preferredvalue="0mil" samesignal="yes" name="copper-clearance-9"/>
  <rule type="Dimension Clearance" builtin_ruleid="9" enabled="yes" priority="0" value="0.2mm" preferredvalue="0.2mm" name="dimension-clearance-1"/>
- <rule type="Restrict Clearance" builtin_ruleid="10" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="restrict-clearance-1"/>
  <rule type="Via Restrict Clearance" builtin_ruleid="21" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="via-restrict-clearance-1"/>
- <rule type="Solder-Mask Clearance" builtin_ruleid="11" enabled="yes" priority="0" value="0mil" preferredvalue="0.15mm" check_name="yes" check_value="no" name="solder-mask-clearance-1"/>
+ <rule type="Restrict Clearance" builtin_ruleid="10" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="restrict-clearance-1"/>
  <rule type="Small Gap" builtin_ruleid="18" enabled="yes" priority="0" name="small-gap-1"/>
+ <rule type="Solder-Mask Clearance" builtin_ruleid="11" enabled="no" priority="0" value="0mil" preferredvalue="0.15mm" check_name="yes" check_value="no" name="solder-mask-clearance-1"/>
  <rule type="Drill Distance" builtin_ruleid="12" enabled="yes" priority="0" value="0.2mm" preferredvalue="0.2mm" name="drill-distance-1"/>
  <rule type="Keepout Clearance" builtin_ruleid="13" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="keepout-clearance-1"/>
  </rules>
