@@ -1,0 +1,527 @@
+#usage "<b>This ULP calculates the signal delay of routed tracks in the layout</b><p><nobr>\n"
+       "run delay [-f frequency_MHz] [-l] [-s outer_layer_signal_speed inner_layer_signal_speed | -d Er_eff_outer Er_inner] name | name* | *name | *name*<br>"
+       "run delay [-f frequency_MHz] [-l] [-s outer_layer_signal_speed inner_layer_signal_speed | -d Er_eff_outer Er_inner] {name1  name2 ...} { name3 name4} ...<p>"
+       "EXAMPLE:<br>"
+       "run delay -s 173085256 139778954 +D -D<br>"
+	   "run delay -s 173085256 139778954 {+D X_D+} {-D X_D-}"
+       "run delay -d 3.478 4.3 d0 d2 d7 A*<br>"
+       "run delay -d 3.581 4.2 d*<br>"
+       "run delay -s 173085256 139778954 *<br>"
+	   "run delay -f 450 -d 3.87 4.6 RF1+ RF1-<p>"
+	   "Either signal speeds shall be given in [m/s] with the -s option, or the dk of the substrate (or the effective dk in case of outer layers). Use e.g. PCB toolkit from Saturn PCB to calculate them<br>"
+	   "If the frequency paramter is used, it shall be given in [MHz]<br>"
+	   "The -l parameter will list the delays and length layer by layer for each signal.<br>"
+       "Wires in layers 1 to 16 will be added, airwires will be shown separately.<br>"
+       "If net names are specified, the differences in length will be calculated in procentual values.<br>"
+       "The procentual difference is based on the geometric mean of the specified tracks which is taken as 100%.<br>"
+       "Parallel tracks and polygons are not taken into consideration.<br>"
+	   "Signals can be grouped together by adding curly braces { } around them<br>"
+       "Only for all signals it is possible to change the sorting of the displayed signals in the list."
+       "<p>"
+       "<author>Author: pal.szabo@databittech.no</author></nobr>"
+
+// THIS PROGRAM IS PROVIDED AS IS AND WITHOUT WARRANTY OF ANY KIND, EXPRESSED OR IMPLIED
+
+#require 6.0
+
+string Help = usage;
+string HButton = "&Help";
+string SButton = "&Save";
+char GROUP_OPEN_CHAR = '{';
+char GROUP_CLOSE_CHAR = '}';
+real c = 299792458; /// m/s
+
+real f;
+int index[];
+
+string Signal[];
+real   Length[];
+real   PropDelay[];
+int    GroupIdx[];
+string LayerDetails[];
+
+string signal_list[];
+int    sig_n = 0;
+int    group_n = 0;
+
+real   route_length[];
+real   Unroute_length[];
+int    Unroute_cnt[];
+
+real   speed_outer_layer = 0;
+real   speed_inner_layer = 0;
+real   frequency = 0;
+int    showEachLayer = 0;
+
+real   GroupedLength[];
+real   GroupedPropDelay[];
+string GroupedSignal[];
+real   GroupedUnroute_length[];
+int    GroupedUnroute_cnt[];
+
+int t;
+numeric string data[];
+
+string h;
+string header;
+
+data[1] = "No signals found.";
+
+int DEBUG = 0;
+
+
+void help(string errorMessage) {
+  if (strlen(errorMessage))
+	dlgMessageBox("<b>ERROR: " + errorMessage + "</b><p><nobr>\n" + Help, "Ok");
+  else
+    dlgMessageBox(errorMessage + Help, "Ok");
+  exit(-1);
+}
+
+
+void show(string line) {  // 2012-04-05
+  string s[];
+  int n = strsplit(s, line, '\t');
+  sprintf(line, "SHOW %s", s[0]);
+  exit(line);
+}
+
+void dialog(void) {
+  int select = 0;
+  int ssort = 0;
+  if (argc < 4) ssort = 1;
+
+  int Result = dlgDialog("Signal delays of layout") {
+    dlgListView("", data, select, ssort) show(data[select]);
+    dlgHBoxLayout {
+      dlgPushButton("+Ok") dlgReject();
+      dlgPushButton(SButton) {
+        board(B) {
+          string FileName = dlgFileSave("Save list", filesetext(B.name, ".txt"));
+          if (FileName) {
+            output (FileName, "wt") {
+              printf("%s", header);
+              for (int x = 0; x < t; x++) printf("%s\n", data[x]);
+            }
+          }
+        }
+      }
+      dlgStretch(1);
+      dlgPushButton(HButton) help("");
+    }
+  };
+  if (!Result)
+     exit(0);
+}
+
+
+real WireLength(real x1, real x2, real y1, real y2) {
+  return sqrt((pow(x2 - x1, 2) + pow(y2 - y1, 2)) );
+}
+
+
+real ArcLength(real ang1, real ang2, real radius) {
+  return radius  * 2 * PI / 360 * (ang2 - ang1);
+}
+
+
+int found(string signame) {
+  if (argc < 4) {
+    return 1;
+  }
+  else if (argc == 4 && argv[1] == "*") return 1;
+  int f = 0;
+  int sig = 0;
+  int groupIdx = 0;
+  int inGroup = 0;
+  for (int n = 0; n < sig_n; n++) {
+    int l = strlen(signal_list[n]);
+  
+	if (signal_list[n][0] == GROUP_OPEN_CHAR){
+		inGroup = 1;
+		continue;
+	}
+	
+	if (signal_list[n][0] == GROUP_CLOSE_CHAR) {
+		inGroup = 0;
+		groupIdx++;
+		continue;
+	}
+
+    if (strchr(signal_list[n], '*') >= 0) {  // wildcard * in name
+      string s;
+
+      if (signal_list[n][0] == '*' && signal_list[n][l-1] == '*') {  // *name*
+        s = strsub(signal_list[n], 1, l-2 );
+        if(strstr(signame, s) > 0) {
+          f = 1;
+          break;
+        }
+      }
+
+      else if (signal_list[n][l-1] == '*') {      // name*
+        s = strsub(signal_list[n], 0, l-1);
+        if(strstr(signame, s) == 0) {
+          f = 1;
+          break;
+        }
+      }
+
+      else if (signal_list[n][0] == '*') {      // *name
+        s = strsub(signal_list[n], 1);
+        if(strstr(signame, s) > 0) {
+          f = 1;
+          break;
+        }
+      }
+    }
+    else if (signame == signal_list[n]) {
+      f = 1;
+      break;
+    }
+	
+	if (!inGroup)
+	  groupIdx++;
+  }
+  
+  group_n = max(group_n, groupIdx);
+  
+  if (f) return groupIdx;
+  else return -1;
+}
+
+// *** difference to base value in percent ***
+string percent( real val, real base_val) {
+  string s;
+  if (base_val) sprintf(s, "%.1f", 100 * (val - base_val) / base_val);
+  else s = "--";
+  return s;
+}
+
+
+// *** phase shift in degrees ***
+string phase( real delay_ns) {
+  string s;
+  if (frequency < 0.000001 || !delay_ns)
+	  s = "--";
+  else
+	  sprintf(s, "%.1f", 0.36 * delay_ns * frequency);
+  return s;
+}
+
+
+// *** average of the delays ***
+real avg_delay(int num_signals) {
+  real average = 0;
+  
+  for (int i=0; i<num_signals; ++i)
+	average += GroupedPropDelay[i];
+
+  return average / num_signals;
+}
+
+// *** average of the lengths ***
+real avg_length(int num_signals) {
+  real average = 0;
+  
+  for (int i=0; i<num_signals; ++i)
+	average += GroupedLength[i];
+
+  return average / num_signals;
+}
+
+
+// *** Unroutet length ***
+string unroute(real l, int cnt) {
+  string s;
+  if (cnt) sprintf(s, "%.f", l);
+  else s = "--";
+  return s;
+}
+
+
+// make sure there are no holes in the group index array
+void group_index_no_holes(int signal_array_size)
+{
+  int index[];
+  
+  sort(signal_array_size, index, GroupIdx);
+  
+  int lastGroupIdx;
+  int newGroupIdx = 0;
+  for (int i=0; i<signal_array_size; ++i)
+  {
+    if ((i != 0) && (lastGroupIdx != GroupIdx[index[i]]))
+	  newGroupIdx++;
+	
+	lastGroupIdx = GroupIdx[index[i]];
+	GroupIdx[index[i]] = newGroupIdx;
+  }
+  
+  if (signal_array_size)
+    group_n = newGroupIdx + 1;
+}
+
+
+// group signals
+void group_signals(int signal_array_size){ 
+  group_index_no_holes(signal_array_size);
+
+  for (int i=0; i<signal_array_size; ++i){
+    if (strlen(GroupedSignal[GroupIdx[i]]))
+		GroupedSignal[GroupIdx[i]] += " " + Signal[i];
+	else 
+	    GroupedSignal[GroupIdx[i]] = Signal[i];
+    GroupedLength[GroupIdx[i]] += Length[i];
+	GroupedPropDelay[GroupIdx[i]] += PropDelay[i];
+	GroupedUnroute_cnt[GroupIdx[i]] += Unroute_cnt[i];
+	GroupedUnroute_length[GroupIdx[i]] += Unroute_length[i];
+  }
+}
+
+
+// check if two strings are equal ignoring their case
+int stringsEqual(string str1, string str2)
+{
+	return strupr(str1) == strupr(str2);
+}
+
+
+// check if a string represents a number
+int isNumber(string str)
+{
+	for (int i=0; i<strlen(str); ++i)
+	{
+		if (!isdigit(str[i]) && !((i ==0) && (str[i] == '-')) && (str[i] != '.'))
+			return 0;
+	}
+	return 1;
+}
+
+
+// process input arguments
+void process_arguments()
+{
+	status("checking input arguments...");
+
+	int optionsProcessed = 0;
+	int argIdx = 1;
+	int inGroup = 0;
+
+	if (argc < 5)
+		help("Too few arguments");
+	
+	while (argIdx < argc)
+	{
+		int len = strlen(argv[argIdx]);
+		
+		if (!optionsProcessed)
+		{
+			// -f
+			if(stringsEqual(argv[argIdx], "-f"))
+			{
+				if ((argIdx < argc - 1) && isNumber(argv[argIdx + 1]))
+					frequency = strtod(argv[++argIdx]);
+				else 
+					help("The -f option requres a frequency parameter");
+			}
+			
+			// -l
+			else if (stringsEqual(argv[argIdx], "-l"))
+			{
+				showEachLayer = 1;
+			}
+			
+			// -s
+			else if(stringsEqual(argv[argIdx], "-s"))
+			{
+				if (speed_inner_layer > 0 || speed_outer_layer > 0)
+					help("Material properties must be supplied only once (either -s option or -d option)");
+				else if ((argIdx < argc - 2) && isNumber(argv[argIdx + 1]) && isNumber(argv[argIdx + 2]))
+				{
+					speed_outer_layer = strtod(argv[++argIdx]) / 1000000; // converted to [mm/ns]
+					speed_inner_layer = strtod(argv[++argIdx]) / 1000000; // converted to [mm/ns]
+				} else 
+					help("The -s option requres the outer layer and internal layer speeds");
+			}
+			
+			// -d
+			else if(stringsEqual(argv[argIdx], "-d"))
+			{
+				if (speed_inner_layer > 0 || speed_outer_layer > 0)
+					help("Material properties must be supplied only once (either -s option or -d option)");
+				else if ((argIdx < argc - 2) && isNumber(argv[argIdx + 1]) && isNumber(argv[argIdx + 2]))
+				{
+					real dk_eff_outer = strtod(argv[++argIdx]);
+					real dk_inner     = strtod(argv[++argIdx]);
+					speed_outer_layer = c / sqrt(dk_eff_outer) / 1000000; // converted to [mm/ns]
+					speed_inner_layer = c / sqrt(dk_inner) / 1000000; // converted to [mm/ns]
+				} else 
+					help("The -d option requres the outer layer (effective) and internal layer permittivity");
+			}
+			
+			else
+			{
+				optionsProcessed = 1;
+			}
+		}
+		
+		if (optionsProcessed)
+		{
+			if (argv[argIdx][0] == GROUP_OPEN_CHAR) 
+			{
+				if (inGroup) 
+					help("Nested groups are not allowed!");
+
+				inGroup = 1;
+				signal_list[sig_n++] = "" + GROUP_OPEN_CHAR;
+				if (len > 1) signal_list[sig_n++] = strupr(strsub(argv[argIdx], 1));
+			} else if (argv[argIdx][len-1] == GROUP_CLOSE_CHAR) 
+			{
+				if (!inGroup) 
+					help("Group closing character without an opening!");
+				
+				inGroup = 0;
+				if (len > 1) signal_list[sig_n++] = strupr(strsub(argv[argIdx], 0, len-1));
+				signal_list[sig_n++] = "" + GROUP_CLOSE_CHAR;
+			} else {
+				signal_list[sig_n++] = strupr(argv[argIdx]);
+			}
+		}
+		argIdx++;
+	}
+	
+	if (speed_outer_layer == 0 || speed_inner_layer == 0)
+		help("The outer layer and inner layer properties must be provided either as speeds (-s option) or as effective permittivity (-d option)");
+}
+
+
+// *** main ***
+if (board) board(B) {
+  string h;
+  
+  process_arguments();
+
+  sprintf(h, "%s\n", EAGLE_SIGNATURE);
+  header += h;
+  sprintf(h, "List of signals with length");
+  header += h;
+
+  status("calculating delays...");
+
+  int n = 0;
+  int i;
+  int gidx;
+  B.signals(S) {
+    gidx = found(S.name);
+    if (gidx >= 0) {
+      int cntUnroute = 0;
+      real unroute = 0;
+	  real deltaLen;
+	  real lengthPerLayer[];
+	  real delayPerLayer[];
+      S.wires(W) {
+        if (W.layer < 17) {           // only copper layers
+          if (W.arc)
+			deltaLen = ArcLength(W.arc.angle1, W.arc.angle2, u2mm(W.arc.radius));
+          else
+            deltaLen = WireLength(u2mm(W.x2), u2mm(W.x1), u2mm(W.y2), u2mm(W.y1));
+		  
+		  // propagation speed is different for outer layers
+		  if ((W.layer == 1) || (W.layer == 16))
+			delayPerLayer[W.layer] += deltaLen / speed_outer_layer;
+		  else 
+			delayPerLayer[W.layer] += deltaLen / speed_inner_layer;
+		
+		  lengthPerLayer[W.layer] += deltaLen;
+        }
+        if (W.layer == 19) {           // unrouted Layer
+          unroute += WireLength(u2mm(W.x2), u2mm(W.x1), u2mm(W.y2), u2mm(W.y1));
+          cntUnroute++;
+        }
+      }
+      Signal[n] = S.name;
+	  Length[n] = 0.0;
+	  PropDelay[n] = 0.0;
+	  for (int layer = 1; layer < 17; ++layer) 	Length[n] 		+= lengthPerLayer[layer];
+	  for (    layer = 1; layer < 17; ++layer) 	PropDelay[n] 	+= delayPerLayer[layer];
+      Unroute_length[n] = unroute;
+      Unroute_cnt[n] = cntUnroute;
+	  GroupIdx[n] = gidx;
+	  if (showEachLayer)
+	  {
+		  string temp;
+		  for (layer = 1; layer < 17; ++layer)
+		  {
+			  if (delayPerLayer[layer] > 0.0000001)
+			  {
+				sprintf(temp, "   %s l%d\t%.3f\t--\t%.3f\t--\t--\t--\t--\n", Signal[n], layer, delayPerLayer[layer], lengthPerLayer[layer]);
+				LayerDetails[n] += temp;
+			  }
+		  }
+	  }
+      ++n;
+    }
+  }
+
+  // group them first
+  group_signals(n);
+
+  if (DEBUG)
+  {
+	  output("debuglog.txt", "wt"){
+		printf("num signals: %d\nnum groups: %d\ninput signal list\tname\tdelay\n", n, group_n);
+		for (i=0; i<sig_n; ++i)
+			printf("\t%s\t%f\n", signal_list[i], PropDelay[i]);
+		printf("signal group idx/names:\n");
+		for (i=0; i<n; ++i)
+			printf("\t%d\t%s\n", GroupIdx[i], Signal[i]);
+		printf("grouped signal names:\n");
+		for (i=0; i<group_n; ++i)
+			printf("\t%s\n", GroupedSignal[i]);
+	  }
+  }
+  
+  sort(group_n, index, GroupedPropDelay);
+  sprintf(h, "Signal\ttPD [ns]\ttPD diff [%%]\tl [mm]\tdiff. [mm]\tdiff. [%%]\tphase [deg]\tunrouted [mm]");
+  data[0] = h;
+  t = 1;
+  real center_length = avg_length(group_n);
+  real center_delay = avg_delay(group_n);
+
+  for (i = 0; i < group_n; ++i) {
+    sprintf(h, "%s\t%.3f\t%s\t%.3f\t%.3f\t%s\t%s\t%s",
+                GroupedSignal[index[i]],
+                GroupedPropDelay[index[i]],
+                percent(GroupedPropDelay[index[i]], center_delay),
+                GroupedLength[index[i]],
+                GroupedLength[index[i]] - center_length,
+                percent(GroupedLength[index[i]], center_length),
+				phase(GroupedPropDelay[index[i]] - center_delay),
+                unroute(GroupedUnroute_length[index[i]], GroupedUnroute_cnt[index[i]])
+           );
+    data[t] = h;
+    t++;
+	
+	if (showEachLayer)
+	{
+		for (int sig = 0; sig < n; ++sig)
+		{
+			if (GroupIdx[sig] == index[i])
+			{
+				string lines[];
+				int numLines;
+				numLines = strsplit(lines, LayerDetails[sig], '\n');
+				for (int k = 0; k < numLines; k++)
+					data[t++] = lines[k];
+			}
+		}
+	}
+  }
+  dialog();
+}
+
+else {
+   dlgMessageBox("Start this ULP in a Board");
+   exit (0);
+}

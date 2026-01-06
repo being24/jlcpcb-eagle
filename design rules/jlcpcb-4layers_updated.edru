@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE designrules SYSTEM "eagle.dtd">
 <eagle version="9.7.0">
-<designrules name="jlcpcb-4layers_updated.edru" version="V2_ExtendedLayers">
+<designrules name="jlcpcb-4layers_updated.edru *" version="V2_ExtendedLayers">
 <classes>
 <class number="0" name="default">
+</class>
+<class number="1" name="PWR">
 </class>
 </classes>
 <rules>
@@ -23,15 +25,15 @@
  <rulecategory type="Via Restrict Clearance" manualdrc="yes" livedrc="yes"/>
  <rulecategory type="Teardrop" manualdrc="no" livedrc="no"/>
  <rule type="Minimum Copper Width" builtin_ruleid="14" enabled="yes" priority="0" value="3mil" preferredvalue="0.09mm" check_polywidth="no" name="minimum-copper-width-1"/>
+ <rule type="Minimum Drill Size" builtin_ruleid="15" enabled="yes" priority="0" value="0.15mm" preferredvalue="0.15mm" name="minimum-drill-size-1"/>
  <rule type="Teardrop" builtin_ruleid="22" enabled="yes" priority="0" onescope="is_via" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-1"/>
  <rule type="Teardrop" builtin_ruleid="23" enabled="yes" priority="1" onescope="is_pad" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-2"/>
  <rule type="Teardrop" builtin_ruleid="24" enabled="yes" priority="2" onescope="is_smd" lengthratio="0.5" widthratio="0.7" curved_sides="no" auto_generate="no" name="teardrop-3"/>
  <rule type="Teardrop" builtin_ruleid="25" enabled="yes" priority="3" onescope="is_wire_polygon" lengthratio="0.5" widthratio="0.9" curved_sides="no" auto_generate="no" name="teardrop-4"/>
- <rule type="Minimum Drill Size" builtin_ruleid="15" enabled="yes" priority="0" value="0.15mm" preferredvalue="0.15mm" name="minimum-drill-size-1"/>
  <rule type="Acute Angle" builtin_ruleid="16" enabled="yes" priority="0" name="acute-angle-1"/>
  <rule type="Wire Stub" builtin_ruleid="17" enabled="yes" priority="0" name="wire-stub-1"/>
  <rule type="Air-Wire" builtin_ruleid="19" enabled="yes" priority="0" name="air-wire-1"/>
- <rule type="Matched Lengths" builtin_ruleid="20" enabled="yes" priority="0" tolerance="10mm" gapfactor="2.5" name="matched-lengths-1"/>
+ <rule type="Matched Lengths" builtin_ruleid="20" enabled="yes" priority="0" tolerance="40mil" gapfactor="2.5" name="matched-lengths-1"/>
  <rule type="Copper Clearance" builtin_ruleid="5" enabled="yes" priority="0" onescope="is_via" otherscope="is_via" value="0.1mm" preferredvalue="0.1mm" samesignal="no" name="copper-clearance-6"/>
  <rule type="Copper Clearance" builtin_ruleid="2" enabled="yes" priority="1" onescope="is_wire_polygon" otherscope="is_via" value="10mil" preferredvalue="10mil" samesignal="no" name="copper-clearance-3"/>
  <rule type="Copper Clearance" builtin_ruleid="1" enabled="yes" priority="2" onescope="is_wire_polygon" otherscope="is_pad_smd" value="0.09mm" preferredvalue="0.09mm" samesignal="no" name="copper-clearance-2"/>
@@ -42,10 +44,10 @@
  <rule type="Copper Clearance" builtin_ruleid="7" enabled="yes" priority="7" onescope="is_smd" otherscope="is_via" value="0mil" preferredvalue="5mil" samesignal="yes" name="copper-clearance-8"/>
  <rule type="Copper Clearance" builtin_ruleid="8" enabled="yes" priority="8" onescope="is_smd" otherscope="is_smd" value="0mil" preferredvalue="0mil" samesignal="yes" name="copper-clearance-9"/>
  <rule type="Dimension Clearance" builtin_ruleid="9" enabled="yes" priority="0" value="0.2mm" preferredvalue="0.2mm" name="dimension-clearance-1"/>
- <rule type="Via Restrict Clearance" builtin_ruleid="21" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="via-restrict-clearance-1"/>
  <rule type="Restrict Clearance" builtin_ruleid="10" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="restrict-clearance-1"/>
- <rule type="Small Gap" builtin_ruleid="18" enabled="yes" priority="0" name="small-gap-1"/>
+ <rule type="Via Restrict Clearance" builtin_ruleid="21" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="via-restrict-clearance-1"/>
  <rule type="Solder-Mask Clearance" builtin_ruleid="11" enabled="no" priority="0" value="0mil" preferredvalue="0.15mm" check_name="yes" check_value="no" name="solder-mask-clearance-1"/>
+ <rule type="Small Gap" builtin_ruleid="18" enabled="yes" priority="0" name="small-gap-1"/>
  <rule type="Drill Distance" builtin_ruleid="12" enabled="yes" priority="0" value="0.2mm" preferredvalue="0.2mm" name="drill-distance-1"/>
  <rule type="Keepout Clearance" builtin_ruleid="13" enabled="yes" priority="0" value="0mil" preferredvalue="0mil" name="keepout-clearance-1"/>
  </rules>
@@ -62,7 +64,7 @@
 <param name="mdDrill" value="0.2mm"/>
 <param name="msWidth" value="3mil"/>
 <param name="msDrill" value="0.15mm"/>
-<param name="dpMaxLengthDifference" value="10mm"/>
+<param name="dpMaxLengthDifference" value="40mil"/>
 <param name="dpGapFactor" value="2.5"/>
 <description language="en">&lt;b&gt;JLCPCB design rules (4 layers) - BGA Via-in-Pad capable&lt;/b&gt;
 &lt;ul&gt;
@@ -73,14 +75,14 @@
 &lt;li&gt;Via spacing: 0.2mm, Pad spacing: 0.45mm&lt;/li&gt;
 &lt;li&gt;Minimum trace: 0.09mm, BGA pad-trace clearance: 0.09mm&lt;/li&gt;
 &lt;/ul&gt;</description>
-<param name="layerSetup" value="(([2:1+([2*63:2])+64:63]))"/>
+<param name="layerSetup" value="(1+2*63+64)"/>
 <param name="mtCopper" value="0.035mm 0.0175mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.035mm 0.0175mm 0.035mm"/>
 <param name="mtIsolate" value="0.2mm 1.065mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm 0.15mm 0.2mm"/>
 <param name="mdViaViaSameLayer" value="6mil"/>
 <param name="mnLayersViaInSmd" value="2"/>
 <param name="mdSmdStop" value="0mil"/>
 <param name="msMicroVia" value="0.1mm"/>
-<param name="msBlindViaRatio" value="0.5"/>
+<param name="msBlindViaRatio" value="0.9"/>
 <param name="rvPadTop" value="0.4"/>
 <param name="rvPadInner" value="0"/>
 <param name="rvPadBottom" value="0.4"/>
@@ -136,13 +138,13 @@
  <layerdef type="Prepreg" id="{0f7824e0-954c-4a14-b5d6-dd4a3f281b62}" layer="2" name="Dielectric-2" locally_modified_material="yes">
  <material name="User Defined" glass_style="" thickness="0.2mm" resin="50%" dielectric_constant_1g="4.5" dissipation_factor_1g="0.02" glass_transition_temperature="125degC" source="User"/>
 </layerdef>
- <layerdef type="Signal" id="{2e2ba2d4-12d1-4919-9b91-5ff4ada93a53}" layer="2" name="Route2" locally_modified_material="yes">
+ <layerdef type="Signal" id="{2e2ba2d4-12d1-4919-9b91-5ff4ada93a53}" layer="2" name="Route2_GND" locally_modified_material="yes">
  <material name="User Defined" thickness="0.0175mm" weight="1oz" process="Electro Deposited" source="User"/>
 </layerdef>
  <layerdef type="Core" id="{d0ce6b3b-862c-4f03-aab7-62766bf263d3}" layer="1" name="Dielectric-1" locally_modified_material="yes">
  <material name="User Defined" construction="" thickness="1.065mm" resin="50%" dielectric_constant_1g="4.5" dissipation_factor_1g="0.02" glass_transition_temperature="125degC" source="User"/>
 </layerdef>
- <layerdef type="Signal" id="{239a3b28-5f42-466f-b3d8-905c161bddbc}" layer="303" name="Route63" locally_modified_material="yes">
+ <layerdef type="Signal" id="{239a3b28-5f42-466f-b3d8-905c161bddbc}" layer="303" name="Route63_PWR" locally_modified_material="yes">
  <material name="User Defined" thickness="0.0175mm" weight="1oz" process="Electro Deposited" source="User"/>
 </layerdef>
  <layerdef type="Prepreg" id="{e874f5fc-6c15-48b0-b45d-a79ab74355b7}" layer="3" name="Dielectric-3" locally_modified_material="yes">
@@ -152,10 +154,6 @@
  <material name="User Defined" thickness="0.035mm" weight="1oz" process="Electro Deposited" source="User"/>
 </layerdef>
  <viadef name="Thru 1:64" startlayer="1" stoplayer="304" complement="no"/>
- <viadef name="MicroVia 64:63|2:1" startlayer="304" stoplayer="303" complement="yes" microvia="yes"/>
- <viadef name="MicroVia 63:2" startlayer="303" stoplayer="2" complement="no" microvia="yes"/>
- <viadef name="Blind 2:64" startlayer="2" stoplayer="304" complement="no"/>
- <viadef name="Blind 1:63" startlayer="1" stoplayer="303" complement="no"/>
  </layerstackup>
  </designrules>
 </eagle>

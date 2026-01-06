@@ -9,6 +9,31 @@
     "output_type": "zip",
     "outputs": [
         {
+            "compress_output": true,
+            "export_cad_netlist": true,
+            "export_eda_component_attributes": true,
+            "export_eda_data": true,
+            "export_eda_footprint_names": true,
+            "export_eda_net_attributes": true,
+            "export_job_name_instead_of_product_model_name": true,
+            "export_layer_features_count": true,
+            "export_neutral_net_names": false,
+            "export_step_profile_board_cutouts": true,
+            "export_step_profile_from_board_shape": true,
+            "export_text_attributes": true,
+            "export_unique_id": true,
+            "export_unit": true,
+            "filename_prefix": "CAMOutputs/ODBFiles",
+            "generate_job_file": true,
+            "odb_format_version": "V8.1+",
+            "output_name": "embed_slider_sensor_3v3_v29",
+            "output_type": "odb++",
+            "outputs": [
+            ],
+            "prepend_netattributes_with_numbersign": true,
+            "use_teamhub_location": false
+        },
+        {
             "filename_prefix": "GerberJob",
             "format_specifier": {
                 "decimal": 4,
@@ -94,7 +119,7 @@
                     },
                     "filename_format": "%N_%FF.G2",
                     "layers": [
-                        15,
+                        303,
                         17,
                         18
                     ],
@@ -113,7 +138,7 @@
                     },
                     "filename_format": "%N_%FF.GBL",
                     "layers": [
-                        16,
+                        304,
                         17,
                         18
                     ],
@@ -219,6 +244,17 @@
             "version": "RS274X"
         },
         {
+            "extension_type": "pdf",
+            "filename_prefix": "CAMOutputs/ImageFiles",
+            "fit_to_Page": true,
+            "monochrome": true,
+            "output_type": "image",
+            "outputs": [
+            ],
+            "page_size": "A4",
+            "pdf_filename": "%N"
+        },
+        {
             "filename_prefix": "",
             "format_specifier": {
                 "decimal": 3,
@@ -235,7 +271,7 @@
                     "filename_format": "%N_drill.XLN",
                     "layers": {
                         "from": 1,
-                        "to": 16
+                        "to": 304
                     },
                     "name": "Drill File",
                     "type": "excellon"
@@ -258,5 +294,5 @@
     "timestamp": "2020-11-18T10:32:27",
     "type": "EAGLE CAM job",
     "units": "metric",
-    "version": "9.2.0"
+    "version": "9.7.0"
 }
